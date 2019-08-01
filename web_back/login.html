@@ -9,6 +9,8 @@
     <link rel="stylesheet" type="text/css" href="css/reset.css">
     <link rel="stylesheet" type="text/css" href="css/iconfont.css">
     <link rel="stylesheet" type="text/css" href="css/main.css">
+    <!-- 导入bootstrap的css文件 -->
+    <link rel="stylesheet" href="./js/bootstrap/css/bootstrap.min.css">
 </head>
 
 <body>
@@ -28,9 +30,78 @@
                 <input type="submit" class="input_sub" value="登 录">
             </form>
         </div>
+    </div>
 
-    </div> 
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">温馨提示:</h4>
+                </div>
+                <div class="modal-body">
 
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入jQ文件 -->
+    <script src="./js/jquery-1.12.4.min.js"></script>
+    <!-- 引入bootstrap的js文件 -->
+    <script src="./js/bootstrap/js/bootstrap.min.js"></script>
+
+    <script>
+        //  步骤:
+        //1.给登录按钮设置一个点击事件.
+        $('.input_sub').on('click', function (e) {
+            e.preventDefault();
+            //获取用户输入的账号和密码
+            var userName = $('.input_txt').val().trim();
+            var passWord = $('.input_pass').val().trim();
+            //做非空判断,如果为空,提示; 如果不为空,继续
+            if (userName == '' || passWord == '') {
+                // alert ('账号或密码为空,请正确输入');
+                //设置弹出文本
+                $('.modal-body').text('账号或密码为空,请正确输入');
+                // 调用bs的方法,弹出模态框
+                $('#myModal').modal({
+                    keyboard: true
+                });
+
+                return;
+            }
+            //     2.发ajax请求
+            $.ajax({
+                type: 'post',
+                url: 'https://autumnfish.cn/big/admin/login',
+                data: {
+                    user_name: userName,
+                    password: passWord
+                },
+                success: function (backData) {
+                    if (backData.code != 200) {
+                        $('.modal-body').text('账号或密码为空,请正确输入');
+                        $('#myModal').modal({
+                            keyboard: true
+                        });
+                    }else {
+                        window.location.href='./index.html';
+                    }
+                }
+            });
+
+        });
+        // 在success函数中去判断请求回来的数据是不是登录成功
+        // 如果不是,提示一下 账号或密码错误
+        // 如果是,跳转到首页index.html
+    </script>
 </body>
 
 </html>
