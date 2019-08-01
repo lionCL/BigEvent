@@ -46,7 +46,6 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                    <button type="button" class="btn btn-primary">确认</button>
                 </div>
             </div>
         </div>
@@ -69,7 +68,7 @@
             if (userName == '' || passWord == '') {
                 // alert ('账号或密码为空,请正确输入');
                 //设置弹出文本
-                $('.modal-body').text('账号或密码为空,请正确输入');
+                $('.modal-body').text('账号或密码为空,请重新输入');
                 // 调用bs的方法,弹出模态框
                 $('#myModal').modal({
                     keyboard: true
@@ -80,14 +79,14 @@
             //     2.发ajax请求
             $.ajax({
                 type: 'post',
-                url: 'https://autumnfish.cn/big/admin/login',
+                url: 'http://localhost:8080/admin/user/login',
                 data: {
-                    user_name: userName,
+                    username: userName,
                     password: passWord
                 },
                 success: function (backData) {
                     if (backData.code != 200) {
-                        $('.modal-body').text('账号或密码为空,请正确输入');
+                        $('.modal-body').text('账号或密码错误,请重新输入');
                         $('#myModal').modal({
                             keyboard: true
                         });
