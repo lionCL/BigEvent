@@ -86,20 +86,20 @@
                 },
                 success: function (backData) {
                     if (backData.code != 200) {
+                        // 在success函数中去判断请求回来的数据是不是登录成功
+                        // 如果不是,提示一下 账号或密码错误
+                        // 如果是,跳转到首页index.html
                         $('.modal-body').text('账号或密码错误,请重新输入');
                         $('#myModal').modal({
                             keyboard: true
                         });
-                    }else {
-                        window.location.href='./index.html';
+                    } else {
+                        window.location.href = './index.html';
                     }
                 }
             });
 
         });
-        // 在success函数中去判断请求回来的数据是不是登录成功
-        // 如果不是,提示一下 账号或密码错误
-        // 如果是,跳转到首页index.html
     </script>
 </body>
 
