@@ -73,7 +73,8 @@
                 <tfoot>
                     <tr>
                         <td colspan="3" class="text-center">
-                            <a href="#" class="btn btn-success" data-toggle="modal" data-target="#addModal">新增分类</a>
+                            <a href="#" class="btn btn-success btn-newAdd" data-toggle="modal"
+                                data-target="#addModal">新增分类</a>
                         </td>
                     </tr>
                 </tfoot>
@@ -86,18 +87,21 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="close"></button>
                     <h4 class="modal-title">新增分类</h4>
                 </div>
                 <div class="modal-body">
                     <form>
+                        <!--隐藏域 用来存放ID -->
+                        <input type="hidden" name="id" id="cateId">
+
                         <div class="form-group">
                             <label for="recipient-name" class="control-label">分类名称:</label>
-                            <input type="text" class="form-control" id="recipient-category">
+                            <input type="text" class="form-control" id="recipient-category" name="name">
                         </div>
                         <div class="form-group">
                             <label for="message-text" class="control-label">分类别名:</label>
-                            <input type="text" class="form-control" id="recipient-slug">
+                            <input type="text" class="form-control" id="recipient-slug" name="slug">
                         </div>
                     </form>
                 </div>
@@ -118,6 +122,8 @@
         $('#model_shutoff').click(function () {
             // alert('shutoff');
             $('#addModal').modal('hide');
+            $('#recipient-category').val('');
+            $('#recipient-slug').val('');
         });
 
         // $('#model_add').click(function () {
@@ -125,12 +131,12 @@
         //     $('#addModal').modal('hide');
         // });
 
-        $('.category_table').delegate('a', 'click', function () {
-            if ($(this).hasClass('btn-info')) {
-                $('#addModal .modal-title').html('修改分类名称');
-                $('#addModal').modal('show');
-            }
-        })
+        // $('.category_table').delegate('a', 'click', function () {
+        //     if ($(this).hasClass('btn-info')) {
+        //         $('#addModal .modal-title').html('修改分类名称');
+        //         $('#addModal').modal('show');
+        //     }
+        // })
     </script>
 
     <!-- 创建模板引擎 -->
@@ -140,8 +146,7 @@
             <td>{{v.name}}</td>
             <td>{{v.slug}}</td>
             <td class="text-center">
-                <a href="javascript:editTr({&quot;id&quot;:&quot;1&quot;,&quot;slug&quot;:&quot;uncategorized&quot;,&quot;name&quot;:&quot;未分类&quot;});"
-                    class="btn btn-info btn-xs">编辑</a>
+                <a href="#" class="btn btn-info btn-xs btn-edit" data-id="{{v.id}}">编辑</a>
                 <a href="#" class="btn btn-danger btn-xs btn-del" data-id="{{v.id}}">删除</a>
             </td>
         </tr>
@@ -166,31 +171,93 @@
             getCategory();
 
             //需求2: 完成文章类别的新增
+            //给模态框的新增/修改按钮添加点击事件
             $('#model_add').on('click', function () {
-                //2.1 获取用户输入的文章类别和文章类别别名
-                var cateName = $('#recipient-category').val().trim();
-                var slugName = $('#recipient-slug').val().trim();
-                //2.2发送ajax请求
-                $.ajax({
-                    type: 'post',
-                    url: 'http://localhost:8080/admin/category/add',
-                    data: {
-                        name: cateName,
-                        slug: slugName
-                    },
-                    success: function (backData) {
-                        if (backData.code == 201) {
-                            // alert('新增成功');
-                            //2.3新增成功,发送ajax请求,渲染新的数据
-                            getCategory();
-                            //2.4 清除输入框
-                            $('#recipient-category').val('');
-                            $('#recipient-slug').val('');
+                if ($(this).hasClass('btn-success')) {
+                    //修改按钮
+                    //获取 模态框中文章分类  分类别名  id名
+                    // var cateId = $('#cateId').val().trim();
+                    // var cateName = $('#recipient-category').val().trim();
+                    // var slugName = $('#recipient-slug').val().trim();
+                    // console.log(cateId,cateName,slugName);
+
+                    //如果数据较多的话 一个一个取太麻烦.
+                    var data = $('form').serialize();
+
+                    //发送ajax请求 完成修改
+                    $.ajax({
+                        type: 'post',
+                        url: 'http://localhost:8080/admin/category/edit',
+                        // data: {
+                        //     id: cateId,
+                        //     name: cateName,
+                        //     slug: slugName
+                        // },
+                        data: data,
+                        success: function (backData) {
+                            if (backData.code == 200) {
+                                alert('修改成功');
+                                getCategory();
+                                $('#recipient-category').val('');
+                                $('#recipient-slug').val('');
+                            }
                         }
-                    }
-                });
+                    });
+
+
+                } else {
+                    //新增按钮
+                    //2.1 获取用户输入的文章类别和文章类别别名
+                    var cateName = $('#recipient-category').val().trim();
+                    var slugName = $('#recipient-slug').val().trim();
+                    //2.2发送ajax请求
+                    $.ajax({
+                        type: 'post',
+                        url: 'http://localhost:8080/admin/category/add',
+                        data: {
+                            name: cateName,
+                            slug: slugName
+                        },
+                        success: function (backData) {
+                            if (backData.code == 201) {
+                                // alert('新增成功');
+                                //2.3新增成功,发送ajax请求,渲染新的数据
+                                getCategory();
+                                //2.4 清除输入框
+                                $('#recipient-category').val('');
+                                $('#recipient-slug').val('');
+                            }
+                        }
+                    });
+                }
                 //手动隐藏模态框 
                 $('#addModal').modal('hide');
+            });
+
+            //需求4:文章编辑功能.
+            //4.1 给编辑按钮注册点击事件
+            $('tbody').on('click', 'a.btn-edit', function () {
+                $('#addModal .modal-title').html('修改分类');
+                $('#addModal #model_add').text('修改').addClass('btn-success');
+
+                //一点击编辑按钮 获取文章分类列表中的文本  文章分类  文章分类别名
+                var cateName = $(this).parent().prev().prev().text();
+                var slugName = $(this).parent().prev().text();
+                var cateID = $(this).attr('data-id');
+                //将获取的值赋值给模态框对应的标签中
+                $('#recipient-category').val(cateName);
+                $('#recipient-slug').val(slugName);
+                $('#cateId').val(cateID);
+
+                //显示模态框
+                $('#addModal').modal('show');
+            });
+
+            //4.2 给新增分类按钮注册点击事件
+            $('.btn-newAdd').on('click', function () {
+                //点击新增分类按钮修改对应的文字和移出bth-success类名恢复模态框的状态
+                $('#addModal .modal-title').html('新增分类');
+                $('#addModal #model_add').text('新增').removeClass('btn-success');
             });
 
             //需求3: 文章分类删除.
@@ -198,29 +265,32 @@
             $('tbody').on('click', 'a.btn-del', function (e) {
                 //阻止a标签的默认跳转事件
                 e.preventDefault()
-
-                var id = $(this).attr('data-id');
-                // var that = this;
-                //3.2 发送ajax请求完成删除
-                $.ajax({
-                    type: 'post',
-                    url: 'http://localhost:8080/admin/category/delete',
-                    data: {
-                        id: id
-                    },
-                    success: function (backData) {
-                        if (backData.code == 204) {
-                            // console.log(this);
-                            //3.3重新渲染 
-                            //(1)重新发送ajax请求渲染
-                            // getCategory();
-                            //(2)直接删除dom数
-                            $(this).parent().parent().remove();
-                        }
-                        //修改this指向 指向点击事件的this
-                    }.bind(this)
-                });
+                if (confirm('你确定要删除吗?')) {
+                    //获取点击删除按钮的id
+                    var id = $(this).attr('data-id');
+                    // var that = this;
+                    //3.2 发送ajax请求完成删除
+                    $.ajax({
+                        type: 'post',
+                        url: 'http://localhost:8080/admin/category/delete',
+                        data: {
+                            id: id
+                        },
+                        success: function (backData) {
+                            if (backData.code == 204) {
+                                // console.log(this);
+                                //3.3重新渲染 
+                                //(1)重新发送ajax请求渲染
+                                // getCategory();
+                                //(2)直接删除dom数
+                                $(this).parent().parent().remove();
+                            }
+                            //修改this指向 指向点击事件的this
+                        }.bind(this)
+                    });
+                }
             });
+
         });
     </script>
 </body>
